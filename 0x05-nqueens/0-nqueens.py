@@ -1,86 +1,73 @@
 #!/usr/bin/python3
+"""
+N queens problem
+- Approach: Backtracking
+    - Use backtracking to find all possible paths
+    - Check if the path is valid
+        - Check if the column is valid
+        - Check if the positive diagonal is valid
+        - Check if the negative diagonal is valid
+    - Add the queen's location to the path
+    - Continue if the path is valid until we reach the end of the board
+    - Backtrack if the path is not valid and try another path
+    - Add path to the result if we reach the end of the board
+- Analysis:
+    - Time: O(n!) - n is the number of queens
+        - We have n choices for the first queen, n - 1 choices for the
+          second queen,n - 2 choices for the third queen, etc.
+    - Space: O(n^2) - n is the number of queens
+"""
+
 import sys
 
 
-def print_usage():
-    """Print usage instructions for the program."""
-    print("Usage: nqueens N")
+def n_queens(n):
+    """ N queens solution """
+    queens, res = [], []
+    cols, positive_diag, negative_diag = set(), set(), set()
 
-
-def validate_input(args):
-    """
-    Validate the input arguments.
-    
-    Args:
-        args (list): The command-line arguments.
-    
-    Returns:
-        int: The validated board size N.
-    
-    Raises:
-        SystemExit: If the input is invalid, it exits the program with a status of 1.
-    """
-    if len(args) != 2:
-        print_usage()
-        sys.exit(1)
-    try:
-        n = int(args[1])
-        if n < 4:
-            print("N must be at least 4")
-            sys.exit(1)
-        return n
-    except ValueError:
-        print("N must be a number")
-        sys.exit(1)
-
-
-def is_safe(board, col):
-    """
-    Check if the current queen placement is safe.
-    
-    Args:
-        board (list): Current state of the board.
-        col (int): Column index of the queen.
-    
-    Returns:
-        bool: True if the queen placement is safe, False otherwise.
-    """
-    for i in range(col):
-        if board[col] == board[i] or abs(board[col] - board[i]) == col - i:
-            return False
-    return True
-
-
-def solve_nqueens(n):
-    """
-    Solve the N Queens problem using backtracking.
-    
-    Args:
-        n (int): The size of the chessboard (N x N).
-    
-    Returns:
-        list: A list of all possible solutions, where each solution is a list
-              of positions [row, col] for each queen on the board.
-    """
-    def backtrack(board, col):
-        if col == n:
-            solutions.append([[i, board[i]] for i in range(n)])
+    def backtrack(row, n, queens):
+        """ Backtracking function """
+        if row == n:
+            res.append(queens[:])
             return
-        for row in range(n):
-            board[col] = row
-            if is_safe(board, col):
-                backtrack(board, col + 1)
+        for col in range(n):
+            if (col in cols or row + col in positive_diag or
+                    row - col in negative_diag):
+                continue
+            cols.add(col)
+            positive_diag.add(row + col)
+            negative_diag.add(row - col)
+            queens.append([row, col])
+            backtrack(row + 1, n, queens)
 
-    solutions = []
-    board = [-1] * n
-    backtrack(board, 0)
-    return solutions
+            cols.remove(col)
+            positive_diag.remove(row + col)
+            negative_diag.remove(row - col)
+            queens.pop()
+    backtrack(0, n, queens)
+    return res
+
+
+def check_args(n):
+    """ Check if n is a valid argument """
+    if not n.isdigit():
+        print("N must be a number")
+        exit(1)
+    if int(n) < 4:
+        print("N must be at least 4")
+        exit(1)
 
 
 def main():
-    """Main function to run the N Queens solver."""
-    n = validate_input(sys.argv)
-    solutions = solve_nqueens(n)
+    """ Main function """
+    args = sys.argv
+    if len(args) != 2:
+        print("Usage: nqueens N")
+        exit(1)
+    n = args[1]
+    check_args(n)
+    solutions = n_queens(int(n))
     for solution in solutions:
         print(solution)
 
