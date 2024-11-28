@@ -4,6 +4,7 @@
 
 def makeChange(coins, total):
     """ Generate changes needed to reach total
+    applies the greedy first algorithm
 
     Args:
         coins ([List]): [List of Coins available]
